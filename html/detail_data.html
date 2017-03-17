@@ -1,0 +1,24 @@
+<ons-page id="detailAnggotaPage">
+    <ons-toolbar>
+        <div class="left">
+            <ons-toolbar-button onclick="fn.tutupHalaman()">
+                <ons-icon icon="ion-chevron-left"></ons-icon>
+            </ons-toolbar-button>
+        </div>
+        <div class="center">Detail Data</div>
+    </ons-toolbar>
+
+    <div style="padding:20px;text-align:center">
+        <form id="formTambahData">
+            <p>
+                <ons-input name="npk" placeholder="NPK" modifier="underbar" float type="text" size="30" id="form_npk"></ons-input>
+            </p>
+            <p><br />
+                <ons-input name="nama_lengkap" placeholder="Nama Lengkap" modifier="underbar" float type="text" size="30" id="form_nama"></ons-input>
+            </p>
+            <p><br />
+                <ons-input name="alamat" placeholder="Alamat" modifier="underbar" float type="text" size="30" id="form_alamat"></ons-input>
+            </p>
+        </form>
+    </div>
+</ons-page>

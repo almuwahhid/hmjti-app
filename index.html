@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Cache-control" content="no-cache">
+        <title>Aplikasi HMJTI</title>
+        <link rel="shortcut icon" href="images/logo-hmjti.png">
+        <link rel="stylesheet" href="node_modules/onsenui/css/onsenui.css">
+        <link rel="stylesheet" href="node_modules/onsenui/css/onsen-css-components.css">
+        <script src="node_modules/jquery/dist/jquery.min.js" charset="utf-8"></script>
+        <script src="node_modules/onsenui/js/onsenui.js" charset="utf-8"></script>
+
+        <script type="text/javascript">
+            ons.ready(function() {
+                window.fn = {};
+
+                window.fn.bukaHalamanSplitter = function(halaman) {
+                    var kontenSplitter = document.getElementById('kontenSplitter');
+                    var menu = document.getElementById('menu');
+                    kontenSplitter.load(halaman).then(function() {
+                        menu.close();
+                    });
+                }
+
+                window.fn.bukaMenu = function() {
+                    var menu = document.getElementById('menu');
+                    menu.open();
+                }
+
+                window.fn.bukaHalamanTambah = function() {
+                    var navigatorGlobal = document.getElementById('navigatorGlobal');
+                    navigatorGlobal.pushPage('html/tambah_data.html');
+                }
+
+                window.fn.tutupHalaman = function() {
+                    var navigatorGlobal = document.getElementById('navigatorGlobal');
+                    navigatorGlobal.popPage({
+                        'animation':'slide'
+                    });
+                }
+
+                window.fn.simpanData = function() {
+
+                    var kumpulanData = $('#formTambahData').serialize();
+
+                    $.ajax({
+                        type:'post',
+                        data: kumpulanData,
+                        url: 'ajax.php?aksi=tambah',
+                        success: function(respon) {
+                            if (respon == 'sukses') {
+                                ons.notification.alert('Data telah disimpan', {
+                                    title: 'Berhasil',
+                                    callback: function() {
+                                        fn.tutupHalaman();
+                                    }
+                                });
+                            }
+                            else {
+                                ons.notification.alert(respon);
+                            }
+                        }
+                    });
+                }
+
+                window.fn.hapusData = function(id_anggota) {
+
+                    ons.notification.confirm('Hapus ?').then(function(status) {
+                        if (status == 1) {
+                            $.ajax({
+                                url : 'ajax.php?aksi=hapusData&id_anggota=' + id_anggota,
+                                success: function(respon) {
+                                    if (respon == 'sukses') {
+                                        ons.notification.alert('Sukses', {
+                                            callback: function(e) {
+                                                window.fn.bukaHalamanSplitter('html/splitter_data_anggota.html');
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        ons.notification.alert(respon);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+
+                window.fn.bukaHalamanDetail = function(id_anggota) {
+                    var navigatorGlobal = document.getElementById('navigatorGlobal');
+                    navigatorGlobal.pushPage('html/detail_data.html', {
+                        data: {id: id_anggota}
+                    });
+                }
+
+                document.addEventListener('show', function(event) {
+                    if (event.target.matches('#dataAnggotaPage')) {
+                        $.ajax({
+                            dataType : 'json',
+                            url : 'ajax.php?aksi=muatData',
+                            success: function(respon) {
+                                var content = "";
+                                for (var i = 0; i < respon.length; i++) {
+
+                                    content += "<ons-list-item tappable>" +
+                                                    "<div class='center' onclick='fn.bukaHalamanDetail(" + respon[i]['id_anggota'] + ")'>" +
+                                                        respon[i]['nama'] +
+                                                    "</div>" +
+                                                    "<div class='right' onclick='fn.hapusData(" + respon[i]['id_anggota'] + ")'>" +
+                                                        "<ons-icon icon='md-delete'></ons-icon>" +
+                                                    "</div>" +
+                                                "</ons-list-item>";
+                                }
+                                document.getElementById('listAnggota').innerHTML = content;
+                            },
+                            error: function(respon) {
+                                console.log(respon);
+                            }
+                        });
+                    }
+                    else if (event.target.matches('#detailAnggotaPage')) {
+                        var id_anggota = event.target.data.id; // tangkap data
+
+                        $.ajax({
+                            dataType : 'json',
+                            url : 'ajax.php?aksi=detailData&id_anggota=' + id_anggota,
+                            success: function(respon) {
+                                document.getElementById('form_npk').value = respon.npk;
+                                document.getElementById('form_nama').value = respon.nama;
+                                document.getElementById('form_alamat').value = respon.alamat;
+                            },
+                            error: function(respon) {
+                                console.log(respon);
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        
+        <ons-navigator page="home.html" id="navigatorGlobal"></ons-navigator>
+
+        <ons-template id="home.html">
+            <ons-page id="homePage">
+                <ons-splitter>
+                    <ons-splitter-side id="menu" side="left" width="220px" collapse swipeable>
+
+                        <ons-page>
+                            <ons-list>
+                                <ons-list-item tappable onclick="fn.bukaHalamanSplitter('html/splitter_home.html')"> Beranda </ons-list-item>
+                                <ons-list-item tappable onclick="fn.bukaHalamanSplitter('html/splitter_profil.html')"> Profil HMJTI </ons-list-item>
+                                <ons-list-item tappable onclick="fn.bukaHalamanSplitter('html/splitter_data_anggota.html')"> Data Anggota </ons-list-item>
+                                <ons-list-item tappable onclick="fn.bukaHalamanSplitter('html/splitter_tentang.html')"> Tentang Aplikasi </ons-list-item>
+                            </ons-list>
+                        </ons-page>
+
+                    </ons-splitter-side>
+                    <ons-splitter-content id="kontenSplitter" page="html/splitter_home.html"></ons-splitter-content>
+                </ons-splitter>
+            </ons-page>
+        </ons-template>
+
+    </body>
+</html>
